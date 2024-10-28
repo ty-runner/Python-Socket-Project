@@ -2,8 +2,6 @@
 
 You are tasked with creating a client-server chat application using Python's socket module. The application should allow multiple clients to connect to the server and exchange messages in real-time. The server should be able to relay messages between connected clients, and clients should be able to send messages to the server, which will broadcast them to all connected clients. Clients should also be able to disconnect from the server gracefully.
 
-Requirements:
-
 ## 1. Server Implementation:
 The server should listen for incoming connections from clients on a specified IP address and port.
 Once a client connects, the server should store the client's information (e.g., IP address, port) and allow the client to send and receive messages.
