@@ -4,47 +4,56 @@ import threading
 # Constants for header size and port number
 HEADER = 64
 PORT = 5050
-
-# Get the server's IP address and hostname
 SERVER = socket.gethostbyname(socket.gethostname())
-print(SERVER)
-print(socket.gethostname())
-ADDR = (SERVER, PORT)  # Create an address tuple for the server
-FORMAT = 'UTF-8'  # Define the message format
-DISCONNECT_MESSAGE = "!DISCONNECT"  # Message to disconnect the client
+ADDR = (SERVER, PORT)
+FORMAT = 'UTF-8'
+DISCONNECT_MESSAGE = "!DISCONNECT"
+
+# List to store connected clients
+clients = []
 
 # Create a TCP/IP socket
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind(ADDR)  # Bind the socket to the address and port
+server.bind(ADDR)
+
+def broadcast(message, sender_conn):
+    """Sends a message to all clients except the sender."""
+    for client in clients:
+        if client != sender_conn:  # Skip the sender
+            print("Reached\n")
+            client.send(message.encode(FORMAT))
 
 def handle_client(conn, addr):
     """Handles communication with a connected client."""
     print(f"[NEW CONNECTION] {addr} connected.")
-    connected = True  # Track connection status
+    connected = True
+    clients.append(conn)  # Add the new client to the list
+
     while connected:
-        # Receive the message length from the client
         msg_length = conn.recv(HEADER).decode(FORMAT)
         if msg_length:
-            msg_length = int(msg_length)  # Convert the length to an integer
-            msg = conn.recv(msg_length).decode(FORMAT)  # Receive the actual message
-            if msg == DISCONNECT_MESSAGE:  # Check for disconnect message
-                connected = False  # Exit the loop if the client wants to disconnect
-            print(f"[{addr}] {msg}")  # Print the received message
-        conn.send("Msg received".encode(FORMAT))  # Acknowledge receipt of the message
+            msg_length = int(msg_length)
+            msg = conn.recv(msg_length).decode(FORMAT)
+            if msg == DISCONNECT_MESSAGE:
+                connected = False
+            print(f"[{addr}] {msg}")
+            broadcast(f"[{addr}] {msg}", conn)  # Broadcast to all except sender
 
-    conn.close()  # Close the connection when done
+        conn.send("Msg received".encode(FORMAT))
+
+    conn.close()
+    clients.remove(conn)  # Remove the client from the list when disconnected
 
 def start():
     """Starts the server and listens for incoming connections."""
-    server.listen()  # Start listening for incoming connections
+    server.listen()
     print(f"[LISTENING] Server is listening on {SERVER}")
+    
     while True:
-        # Accept a new connection
         conn, addr = server.accept()
-        # Start a new thread to handle the client
         thread = threading.Thread(target=handle_client, args=(conn, addr))
-        thread.start()  # Start the thread
-        print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 1}")  # Print active connections
+        thread.start()
+        print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 1}")
 
 print("[STARTING] server is starting...")
-start()  # Start the server
+start()
