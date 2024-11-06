@@ -7,7 +7,7 @@ PORT = 5050
 SERVER = socket.gethostbyname(socket.gethostname())
 ADDR = (SERVER, PORT)
 FORMAT = 'UTF-8'
-DISCONNECT_MESSAGE = "!DISCONNECT"
+DISCONNECT_MESSAGE = "QUIT"
 
 # List to store connected clients
 clients = []
@@ -20,7 +20,6 @@ def broadcast(message, sender_conn):
     """Sends a message to all clients except the sender."""
     for client in clients:
         if client != sender_conn:  # Skip the sender
-            print("Reached\n")
             client.send(message.encode(FORMAT))
 
 def handle_client(conn, addr):
@@ -30,16 +29,20 @@ def handle_client(conn, addr):
     clients.append(conn)  # Add the new client to the list
 
     while connected:
-        msg_length = conn.recv(HEADER).decode(FORMAT)
-        if msg_length:
-            msg_length = int(msg_length)
-            msg = conn.recv(msg_length).decode(FORMAT)
-            if msg == DISCONNECT_MESSAGE:
-                connected = False
-            print(f"[{addr}] {msg}")
-            broadcast(f"[{addr}] {msg}", conn)  # Broadcast to all except sender
+        try:
+            msg_length = conn.recv(HEADER).decode(FORMAT)
+            if msg_length:
+                msg_length = int(msg_length)
+                msg = conn.recv(msg_length).decode(FORMAT)
+                if msg == DISCONNECT_MESSAGE:
+                    connected = False
+                print(f"[{addr}] {msg}")
+                broadcast(f"[{addr}] {msg}", conn)  # Broadcast to all except sender
 
-        conn.send("Msg received".encode(FORMAT))
+            conn.send("Msg received".encode(FORMAT))
+        except:
+            print("A client disconnected.")
+            break
 
     conn.close()
     clients.remove(conn)  # Remove the client from the list when disconnected

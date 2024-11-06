@@ -4,25 +4,33 @@ import threading
 HEADER = 64
 PORT = 5050
 FORMAT = 'UTF-8'
-DISCONNECT_MESSAGE = "!DISCONNECT"
+DISCONNECT_MESSAGE = "QUIT"
 SERVER = socket.gethostbyname(socket.gethostname())
 ADDR = (SERVER, PORT)
 
 # Set up the client socket
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client.connect(ADDR)
-
+try:
+    client.connect(ADDR)
+except:
+    print("[ERROR] Connection failed!")
+    exit()
 def receive():
     """Continuously listens for incoming messages from the server."""
     while True:
         try:
             message = client.recv(2048).decode(FORMAT)
             if message:
-                print(f"[BROADCAST] {message}")
+                #if message is an acknowledgement, increment the counter
+                if(message == "Msg received"):
+                    print(f"[ACK] {message}")
+                    continue
+                print(f"{message}")
         except:
             # If an error occurs, break the loop and close the connection
-            print("[ERROR] An error occurred!")
+            print("Safely Disconnecting")
             client.close()
+            exit()
             break
 
 def send(msg):
@@ -39,7 +47,7 @@ receive_thread = threading.Thread(target=receive)
 receive_thread.start()
 
 # Main loop to send messages to the server
-print("Type messages to send. Type '!DISCONNECT' to disconnect.")
+print("Type messages to send. Type 'QUIT' to disconnect.")
 while True:
     msg = input()
     send(msg)
