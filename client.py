@@ -12,6 +12,7 @@ ADDR = (SERVER, PORT)
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 try:
     client.connect(ADDR)
+    print(f"[CONNECTED] Connected to {SERVER}")
 except:
     print("[ERROR] Connection failed!")
     exit()
@@ -21,7 +22,7 @@ def receive():
         try:
             message = client.recv(2048).decode(FORMAT)
             if message:
-                #if message is an acknowledgement, increment the counter
+                #format print if ack, else just print like normal message received
                 if(message == "Msg received"):
                     print(f"[ACK] {message}")
                     continue

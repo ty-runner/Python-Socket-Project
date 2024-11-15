@@ -1,0 +1,13 @@
+1. Ensure python is installed on your machine in order to execute the 2 files.
+    - This can be done via this website https://www.python.org/downloads/
+
+2. Start the server using py server.py
+
+3. Start the client(s) using py client.py, this will automatically connect to the server assuming the server is running
+    - For more clients, open a new terminal instance and run the same command py client.py
+
+4. To send messages as a client, just type in the terminal window and hit enter to send your message, this will broadcast to all other clients along with their address information (IP address, PortNum)
+
+5. To close a client instance, type QUIT and hit enter in the client instance you wish to close. Server will recognize and remove the client, this message will not be broadcasted.
+
+6. To close the server instance, close the terminal window.

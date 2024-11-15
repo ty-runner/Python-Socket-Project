@@ -1,7 +1,6 @@
 import socket
 import threading
 
-# Constants for header size and port number
 HEADER = 64
 PORT = 5050
 SERVER = socket.gethostbyname(socket.gethostname())
@@ -35,9 +34,11 @@ def handle_client(conn, addr):
                 msg_length = int(msg_length)
                 msg = conn.recv(msg_length).decode(FORMAT)
                 if msg == DISCONNECT_MESSAGE:
+                    print(f"{addr} disconnected.")
                     connected = False
-                print(f"[{addr}] {msg}")
-                broadcast(f"[{addr}] {msg}", conn)  # Broadcast to all except sender
+                    break
+                print(f"{addr} {msg}")
+                broadcast(f"{addr} {msg}", conn)  # Broadcast to all except sender
 
             conn.send("Msg received".encode(FORMAT))
         except:
