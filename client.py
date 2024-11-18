@@ -16,6 +16,9 @@ try:
 except:
     print("[ERROR] Connection failed!")
     exit()
+
+username = input("Enter your username: ")
+
 def receive():
     """Continuously listens for incoming messages from the server."""
     while True:
@@ -24,11 +27,9 @@ def receive():
             if message:
                 #format print if ack, else just print like normal message received
                 if(message == "Msg received"):
-                    print(f"[ACK] {message}")
                     continue
                 print(f"{message}")
         except:
-            # If an error occurs, break the loop and close the connection
             print("Safely Disconnecting")
             client.close()
             exit()
@@ -47,12 +48,15 @@ def send(msg):
 receive_thread = threading.Thread(target=receive)
 receive_thread.start()
 
-# Main loop to send messages to the server
+# Send the username to the server
+send(username)
+
+# Continuously send messages to the server
 print("Type messages to send. Type 'QUIT' to disconnect.")
 while True:
     msg = input()
-    send(msg)
     if msg == DISCONNECT_MESSAGE:
         break
+    send(f"{username}: {msg}")
 
 client.close()

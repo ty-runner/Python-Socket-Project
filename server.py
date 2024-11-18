@@ -8,8 +8,9 @@ ADDR = (SERVER, PORT)
 FORMAT = 'UTF-8'
 DISCONNECT_MESSAGE = "QUIT"
 
-# List to store connected clients
-clients = []
+# List to store connected clients and their usernames
+clients = {}
+lock = threading.Lock()
 
 # Create a TCP/IP socket
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -25,7 +26,13 @@ def handle_client(conn, addr):
     """Handles communication with a connected client."""
     print(f"[NEW CONNECTION] {addr} connected.")
     connected = True
-    clients.append(conn)  # Add the new client to the list
+    username_length = conn.recv(HEADER).decode(FORMAT)
+    if username_length:
+        username_length = int(username_length)
+        username = conn.recv(username_length).decode(FORMAT)
+        with lock:
+            clients[conn] = username
+    print(f"[USERNAME] {username} connected.")
 
     while connected:
         try:
@@ -34,11 +41,11 @@ def handle_client(conn, addr):
                 msg_length = int(msg_length)
                 msg = conn.recv(msg_length).decode(FORMAT)
                 if msg == DISCONNECT_MESSAGE:
-                    print(f"{addr} disconnected.")
+                    print(f"{username} disconnected.")
                     connected = False
                     break
-                print(f"{addr} {msg}")
-                broadcast(f"{addr} {msg}", conn)  # Broadcast to all except sender
+                print(f"{msg}")
+                broadcast(f"{msg}", conn)  # Broadcast to all except sender
 
             conn.send("Msg received".encode(FORMAT))
         except:
@@ -46,7 +53,8 @@ def handle_client(conn, addr):
             break
 
     conn.close()
-    clients.remove(conn)  # Remove the client from the list when disconnected
+    with lock:
+        del clients[conn]  # Remove the client from the list when disconnected
 
 def start():
     """Starts the server and listens for incoming connections."""
