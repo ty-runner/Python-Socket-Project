@@ -25,7 +25,6 @@ def receive():
         try:
             message = client.recv(2048).decode(FORMAT)
             if message:
-                #format print if ack, else just print like normal message received
                 if(message == "Msg received"):
                     continue
                 print(f"{message}")
@@ -48,7 +47,6 @@ def send(msg):
 receive_thread = threading.Thread(target=receive)
 receive_thread.start()
 
-# Send the username to the server
 send(username)
 
 # Continuously send messages to the server

@@ -10,7 +10,7 @@ DISCONNECT_MESSAGE = "QUIT"
 
 # List to store connected clients and their usernames
 clients = {}
-lock = threading.Lock()
+lock = threading.Lock() #for thread safety
 
 # Create a TCP/IP socket
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
